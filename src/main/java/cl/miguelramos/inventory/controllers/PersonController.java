@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 // La anotación @RestController indica que esta clase es un controlador REST.
 // Esto significa que se encarga de manejar las solicitudes HTTP para la API.
 @RestController
@@ -47,7 +49,7 @@ public class PersonController {
   // Manejador de solicitud POST para crear una nueva persona.
   // @RequestBody indica que un objeto Person será enviado en el cuerpo de la solicitud.
   @PostMapping
-  public ResponseEntity<Person> createPerson(@RequestBody Person person) {
+  public ResponseEntity<Person> createPerson(@RequestBody Person person) throws JsonProcessingException {
     // Guarda la nueva persona y devuelve el objeto guardado.
     return ResponseEntity.ok(personService.save(person));
   }
@@ -61,7 +63,13 @@ public class PersonController {
             .map(existingPerson -> {
               // Si existe, se actualiza con los nuevos datos y se guarda.
               person.setId(id);
-              return ResponseEntity.ok(personService.save(person));
+              try {
+                return ResponseEntity.ok(personService.save(person));
+              } catch (JsonProcessingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
+              return null;
             })
             // Si no existe, se devuelve un estado 404 Not Found.
             .orElse(ResponseEntity.notFound().build());
